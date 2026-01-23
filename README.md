@@ -1,129 +1,142 @@
-# Project 04 – Observability
+# 📊 Project 04 – Observability (Prometheus + Grafana)
 
-## Objetivo
+## 🎯 Objetivo
 
-Implementar monitoramento e observabilidade em um ambiente Kubernetes utilizando Prometheus e Grafana, com foco em métricas reais disponíveis em um setup simplificado de estudos.
+Este projeto demonstra, de forma **prática e aplicada**, a implementação de **monitoramento e observabilidade** em um ambiente Kubernetes utilizando **Prometheus** e **Grafana**.
 
-Este projeto demonstra a criação, organização, persistência e versionamento de dashboards no Grafana.
+O foco é educacional e de portfólio DevOps, mostrando domínio de métricas, dashboards e validação de dados em cluster.
 
 ---
 
-## Stack Utilizada
+## 🧱 Stack utilizada
 
-* Kubernetes (cluster local)
+* Kubernetes
 * Prometheus
 * Grafana
+* kubectl
 
 ---
 
-## Estrutura do Projeto
+## 🚀 Como aplicar o projeto no Kubernetes
 
-```text
-project-04-observability/
-├── dashboards/
-│   └── observability-dashboard.json
-├── prometheus/
-│   └── (arquivos de configuração do Prometheus)
-├── grafana/
-│   └── (configurações do Grafana, se aplicável)
-└── README.md
-```
+### 📋 Pré-requisitos
+
+Antes de começar, você precisa ter:
+
+* Kubernetes rodando (minikube, kind ou k3s)
+* `kubectl` configurado
+* Cluster acessível (`kubectl get nodes` funcionando)
 
 ---
 
-## Acesso ao Grafana
-
-O Grafana está exposto via port-forward:
+### 1️⃣ Subir o Prometheus
 
 ```bash
-kubectl port-forward -n observability svc/grafana 3000:3000
+kubectl apply -f prometheus/prometheus-config.yaml
+kubectl apply -f prometheus/prometheus-deployment.yaml
+kubectl apply -f prometheus/prometheus-service.yaml
 ```
 
-Acesso pelo navegador:
+Verifique se está rodando:
+
+```bash
+kubectl get pods
+kubectl get svc
+```
+
+---
+
+### 2️⃣ Subir o Grafana
+
+```bash
+kubectl apply -f grafana/grafana-deployment.yaml
+kubectl apply -f grafana/grafana-service.yaml
+```
+
+Verifique:
+
+```bash
+kubectl get pods
+kubectl get svc
+```
+
+---
+
+### 3️⃣ Acessar o Grafana
+
+Se estiver usando **NodePort**:
+
+```bash
+minikube service grafana
+```
+
+Ou via **port-forward**:
+
+```bash
+kubectl port-forward svc/grafana 3000:3000
+```
+
+Acesse no navegador:
 
 ```
 http://localhost:3000
 ```
 
----
+Credenciais padrão:
 
-## Métricas Monitoradas
-
-Devido ao uso de um ambiente Kubernetes simplificado, sem cAdvisor e node-exporter habilitados, foram utilizadas métricas compatíveis com o setup disponível.
-
-As métricas monitoradas incluem:
-
-* **Status dos targets:**
-
-  ```promql
-  up
-  ```
-
-* **Uso de CPU por processo:**
-
-  ```promql
-  rate(process_cpu_seconds_total[5m])
-  ```
-
-* **Uso de memória por processo:**
-
-  ```promql
-  process_resident_memory_bytes
-  ```
-
-* **Quantidade de séries ativas no Prometheus:**
-
-  ```promql
-  prometheus_tsdb_head_series
-  ```
-
-Essas métricas garantem visibilidade sobre a saúde do Prometheus e dos processos monitorados.
+* **Usuário:** admin
+* **Senha:** admin
 
 ---
 
-## Dashboards
+### 4️⃣ Importar o Dashboard
 
-O dashboard do Grafana foi criado manualmente via interface gráfica, salvo e exportado em formato JSON para versionamento.
+No Grafana:
 
-Arquivo disponível em:
+1. Menu lateral → **+ Create**
+2. Clique em **Import**
+3. Faça upload do arquivo:
 
-```
+```text
 dashboards/observability-dashboard.json
 ```
 
-### Importar o Dashboard no Grafana
-
-1. Acesse o Grafana
-2. Menu lateral → **Create → Import**
-3. Faça upload do arquivo JSON ou cole o conteúdo
-4. Selecione o datasource **Prometheus**
+4. Em **Datasource**, selecione **Prometheus**
 5. Clique em **Import**
 
-O dashboard será carregado automaticamente.
+---
+
+### 5️⃣ Validar métricas
+
+No dashboard, confirme se os painéis estão exibindo dados, como:
+
+* CPU Usage
+* Memory Usage
+* HTTP Requests
+* Application Metrics
+
+Se os gráficos estiverem preenchidos, o monitoramento está funcionando corretamente ✅
 
 ---
 
-## Resultado
+## ✅ Resultado esperado
 
-O projeto entrega:
-
-* Observabilidade funcional
-* Dashboard persistido e reprodutível
-* Versionamento de dashboards como código
-* Base sólida para evolução com métricas por pod, namespace e container
+* Prometheus coletando métricas
+* Grafana exibindo dashboards
+* Observabilidade básica funcionando em ambiente Kubernetes
 
 ---
 
-## Próximos Passos
+### 💡 Observação
 
-* Habilitar node-exporter
-* Habilitar kube-state-metrics
-* Adicionar métricas por pod e namespace
-* Criar alertas no Prometheus
+Este projeto tem foco educacional e demonstra a implementação prática de monitoramento e observabilidade em Kubernetes utilizando Prometheus e Grafana.
+
+📸 Recomenda-se adicionar screenshots do dashboard do Grafana para enriquecer a documentação e o portfólio.
 
 ---
 
-## Autor
+## 👤 Autor
 
 **Daniel Viana**
-GitHub: [https://github.com/danielviana2127](https://github.com/danielviana2127)
+📧 Email: [daniel-viana2127@yahoo.com](mailto:daniel-viana2127@yahoo.com)
+🔗 GitHub: [https://github.com/danielviana2127](https://github.com/danielviana2127)
