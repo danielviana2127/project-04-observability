@@ -1,179 +1,129 @@
-# Projeto 4 – Monitoramento e Observabilidade
+# Project 04 – Observability
 
 ## Objetivo
 
-Monitorar uma aplicação Java rodando em Kubernetes, coletando métricas com Prometheus e visualizando-as no Grafana.
+Implementar monitoramento e observabilidade em um ambiente Kubernetes utilizando Prometheus e Grafana, com foco em métricas reais disponíveis em um setup simplificado de estudos.
+
+Este projeto demonstra a criação, organização, persistência e versionamento de dashboards no Grafana.
 
 ---
 
 ## Stack Utilizada
 
-* Kubernetes (Minikube ou Kind)
+* Kubernetes (cluster local)
 * Prometheus
 * Grafana
-* NGINX Exporter
-* Spring Boot + Actuator + Micrometer
 
 ---
 
 ## Estrutura do Projeto
 
-A estrutura real do projeto está organizada da seguinte forma:
-
-```
-.
-├── README.md
-├── dashboards
-│   └── java-app-observability.json
-├── grafana
-│   ├── grafana-deployment.yaml
-│   └── grafana-service.yaml
-└── prometheus
-    ├── namespace.yaml
-    ├── nginx-config.yaml
-    ├── nginx-deployment.yaml
-    ├── nginx-exporter-service.yaml
-    ├── nginx-exporter.yaml
-    ├── nginx-service.yaml
-    ├── prometheus-config.yaml
-    ├── prometheus-deployment.yaml
-    └── prometheus-service.yaml
+```text
+project-04-observability/
+├── dashboards/
+│   └── observability-dashboard.json
+├── prometheus/
+│   └── (arquivos de configuração do Prometheus)
+├── grafana/
+│   └── (configurações do Grafana, se aplicável)
+└── README.md
 ```
 
 ---
 
-## Métricas Coletadas
+## Acesso ao Grafana
 
-As métricas são expostas pela aplicação Java através do endpoint:
+O Grafana está exposto via port-forward:
 
-```
-/actuator/prometheus
-```
-
-Principais métricas utilizadas:
-
-* JVM (memória, GC, threads)
-* HTTP Requests
-* Latência das requisições
-* Status HTTP (200, 400, 500)
-
----
-
-## Consultas PromQL Utilizadas
-
-### Taxa de requisições por status HTTP
-
-```promql
-sum by (status) (
-  rate(http_server_requests_seconds_count[1m])
-)
+```bash
+kubectl port-forward -n observability svc/grafana 3000:3000
 ```
 
-### Uso de memória JVM
+Acesso pelo navegador:
 
-```promql
-jvm_memory_used_bytes
 ```
-
-### Tempo médio de resposta
-
-```promql
-rate(http_server_requests_seconds_sum[1m])
-/
-rate(http_server_requests_seconds_count[1m])
+http://localhost:3000
 ```
 
 ---
 
-## Grafana
+## Métricas Monitoradas
 
-### Dashboard
+Devido ao uso de um ambiente Kubernetes simplificado, sem cAdvisor e node-exporter habilitados, foram utilizadas métricas compatíveis com o setup disponível.
 
-O dashboard foi criado manualmente e exportado para o arquivo:
+As métricas monitoradas incluem:
+
+* **Status dos targets:**
+
+  ```promql
+  up
+  ```
+
+* **Uso de CPU por processo:**
+
+  ```promql
+  rate(process_cpu_seconds_total[5m])
+  ```
+
+* **Uso de memória por processo:**
+
+  ```promql
+  process_resident_memory_bytes
+  ```
+
+* **Quantidade de séries ativas no Prometheus:**
+
+  ```promql
+  prometheus_tsdb_head_series
+  ```
+
+Essas métricas garantem visibilidade sobre a saúde do Prometheus e dos processos monitorados.
+
+---
+
+## Dashboards
+
+O dashboard do Grafana foi criado manualmente via interface gráfica, salvo e exportado em formato JSON para versionamento.
+
+Arquivo disponível em:
 
 ```
-dashboards/java-app-observability.json
+dashboards/observability-dashboard.json
 ```
 
-### Importação do Dashboard
+### Importar o Dashboard no Grafana
 
 1. Acesse o Grafana
-2. Vá em **Dashboards → Import**
-3. Faça upload do arquivo JSON
-4. Selecione o datasource Prometheus
+2. Menu lateral → **Create → Import**
+3. Faça upload do arquivo JSON ou cole o conteúdo
+4. Selecione o datasource **Prometheus**
 5. Clique em **Import**
 
----
-
-## Como Executar o Projeto
-
-### 1. Criar namespace
-
-```bash
-kubectl apply -f prometheus/namespace.yaml
-```
-
-### 2. Subir Prometheus
-
-```bash
-kubectl apply -f prometheus/prometheus-config.yaml
-kubectl apply -f prometheus/prometheus-deployment.yaml
-kubectl apply -f prometheus/prometheus-service.yaml
-```
-
-### 3. Subir NGINX Exporter
-
-```bash
-kubectl apply -f prometheus/nginx-config.yaml
-kubectl apply -f prometheus/nginx-deployment.yaml
-kubectl apply -f prometheus/nginx-service.yaml
-kubectl apply -f prometheus/nginx-exporter.yaml
-kubectl apply -f prometheus/nginx-exporter-service.yaml
-```
-
-### 4. Subir Grafana
-
-```bash
-kubectl apply -f grafana/grafana-deployment.yaml
-kubectl apply -f grafana/grafana-service.yaml
-```
-
-### 5. Acessar Grafana
-
-```bash
-kubectl port-forward svc/grafana 3000:3000
-```
-
-Acesse em: [http://localhost:3000](http://localhost:3000)
+O dashboard será carregado automaticamente.
 
 ---
 
-## Resultado Final
+## Resultado
 
-* Aplicação Java com métricas expostas
-* Prometheus coletando métricas
-* Grafana exibindo dashboards funcionais
-* Monitoramento por status HTTP e performance
+O projeto entrega:
+
+* Observabilidade funcional
+* Dashboard persistido e reprodutível
+* Versionamento de dashboards como código
+* Base sólida para evolução com métricas por pod, namespace e container
 
 ---
 
-## Conclusão
+## Próximos Passos
 
-Este projeto demonstra na prática conceitos fundamentais de observabilidade em ambientes Kubernetes, incluindo coleta de métricas, visualização e análise de performance, seguindo boas práticas de DevOps.
+* Habilitar node-exporter
+* Habilitar kube-state-metrics
+* Adicionar métricas por pod e namespace
+* Criar alertas no Prometheus
 
-## Conclusão
+---
 
-Este projeto demonstra, de forma prática e funcional, a implementação de **monitoramento e observabilidade** para uma aplicação Java executando em **Kubernetes**, utilizando **Prometheus** e **Grafana**.
+## Autor
 
-Ao longo do projeto, foi possível:
-
-* Expor métricas da aplicação via **Spring Boot Actuator** no endpoint `/actuator/prometheus`;
-* Configurar o **Prometheus** para coletar métricas da aplicação e de componentes de infraestrutura;
-* Visualizar métricas reais de JVM, requisições HTTP e status de respostas;
-* Criar e exportar um **dashboard funcional no Grafana**, permitindo análise clara do comportamento da aplicação;
-* Organizar a infraestrutura de forma modular e reproduzível, seguindo boas práticas de projetos DevOps.
-
-O ambiente simula um cenário real de produção, evidenciando domínio dos conceitos de **observabilidade**, **monitoramento**, **PromQL**, **Kubernetes** e **boas práticas de infraestrutura**.
-
-Este projeto consolida conhecimentos essenciais para ambientes cloud-native e serve como um **artefato de portfólio**, demonstrando capacidade de diagnosticar, analisar e acompanhar a saúde de aplicações em produção.
-
+**Daniel Viana**
+GitHub: [https://github.com/danielviana2127](https://github.com/danielviana2127)

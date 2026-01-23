@@ -13,11 +13,6 @@ data:
         static_configs:
           - targets: ["localhost:9090"]
 
-      - job_name: "nginx"
-        static_configs:
-          - targets:
-              - "nginx-exporter.observability.svc.cluster.local:9113"
-
       - job_name: "java-api"
         metrics_path: /actuator/prometheus
         static_configs:

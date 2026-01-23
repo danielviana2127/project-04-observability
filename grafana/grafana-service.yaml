@@ -4,7 +4,6 @@ metadata:
   name: grafana
   namespace: observability
 spec:
-  type: ClusterIP
   selector:
     app: grafana
   ports:
