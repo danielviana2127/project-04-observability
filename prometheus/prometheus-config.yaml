@@ -7,15 +7,15 @@ data:
   prometheus.yml: |
     global:
       scrape_interval: 15s
+      evaluation_interval: 15s
 
     scrape_configs:
       - job_name: "prometheus"
         static_configs:
-          - targets: ["localhost:9090"]
+          - targets:
+              - "prometheus.observability.svc.cluster.local:9090"
 
-      - job_name: "java-api"
-        metrics_path: /actuator/prometheus
+      - job_name: "nginx-exporter"
         static_configs:
           - targets:
-              - "app-service.default.svc.cluster.local:8080"
-
+              - "nginx-exporter.observability.svc.cluster.local:9113"
